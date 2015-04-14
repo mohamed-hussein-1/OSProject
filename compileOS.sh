@@ -15,5 +15,12 @@ echo '-------------------------'
 echo 'copying to floppya.img setor 3'
 dd if=kernel of=floppya.img bs=512 conv=notrunc seek=3
 dd if=message.txt of=floppya.img bs=512 count=1 seek=30 conv=notrunc
+
+echo 'done copying kernel'
+echo '------------------------'
+echo 'copying map to sector 1'
+dd if=map.img of=floppya.img bs=512 count=1 seek=1 conv=notrunc
+echo 'copying file to sector 2'
+dd if=dir.img of=floppya.img bs=512 count=1 seek=2 conv=notrunc
 echo 'done copying :D ur os is now ready to print hello world :D'
 
