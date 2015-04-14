@@ -1,4 +1,4 @@
-cd //home/agent47/Codes/osproject/M1
+cd //home/agent47/Codes/osproject
 echo 'went to the write drive'
 echo 'compiling The c Kernel File kernel.c'
 nasm bootload.asm

@@ -1,12 +1,36 @@
 main(){
-	char line[80];
-makeInterrupt21();
-interrupt(0x21,1,line,0,0);
-interrupt(0x21,0,line,0,0);
-
-
-	while(1 == 1){	
+	char buffer[13312]; /*this is the maximum size of a file*/
+	makeInterrupt21();
+	interrupt(0x21, 3, "messag\0", buffer, 0); /*read the file into buffer*/
+	interrupt(0x21, 0, buffer, 0, 0); /*print out the file*/
+	while(1){
 	}
+// 	char line[80];
+// makeInterrupt21();
+// interrupt(0x21,1,line,0,0);
+// interrupt(0x21,0,line,0,0);
+	// int m ;
+	// char x1[2];
+	// char x2[2];
+	// char yes[2];
+	// char no[2];
+	// x1[0] = 'a';
+	// x1[1] = 'b';
+	// x2[0] = 'a';
+	// x2[1] = 'b';
+	// yes[0] = '1';
+	// yes[1] = '\0';
+	// no[0] = '0';
+	// no[1] = '\0';
+	// m = charEqual(x1,x2,2);
+	// if (m == 1){
+	// 	printString(yes);
+	// }else if (m == 0){
+	// 	printString(no);
+	// }
+	// else {
+	// 	printString(no);	
+	// }
 }
 printString(char* arr){
 	while(*arr != '\0'){
@@ -91,7 +115,59 @@ void handleInterrupt21(int ax, int bx, int cx, int dx){
 	else if(ax == 2){
 		readSector(bx , cx);
 	}
+	else if(ax == 3){
+		readFile(bx,cx);
+	}
 	else {
 	printString("Error \0");
+	}
+}
+readFile(char* fileName,char* fileToBeRead){
+	char dirSector[512];
+	char* dirSectorP = dirSector;
+	int isEqual = 33;
+	int i = 0;
+
+	readSector(dirSector,2);
+	while(i < 16){
+		isEqual = charEqual(dirSectorP,fileName,6);
+		if (isEqual == 1){
+			dirSectorP = dirSectorP+6;
+			readThisFile(dirSectorP,fileToBeRead);
+			break;
+		}
+		dirSectorP = dirSectorP+32;
+		++i;
+	}
+	return;
+}
+int charEqual(char* x,char* y,int size){
+	int i = 0;
+	int eq = 1;
+	while (i < size){
+		if(*x==*y){
+		}
+		else {
+			eq = 0;
+			break;
+		}
+		++x;
+		++y;
+		++i;
+	}
+	return eq;
+}
+readThisFile(char* secNum,char* fileToBeRead){
+	int i = 0;
+	int secAsInt;
+	while(i<26){
+		secAsInt = *secNum;	
+		if (secAsInt == 0){
+			break;
+		}
+		readSector(fileToBeRead,secAsInt);
+		fileToBeRead += 512;
+		secNum = secNum+1;
+		++i;
 	}
 }
