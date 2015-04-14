@@ -35,6 +35,11 @@ readString(char* arr){
 		++size;
 		}
 	}
+	while(size>0){
+		interrupt(0x10, (0xE*256)+0x8, 0, 0, 0);
+		size--;
+	}
+	interrupt(0x10, (0xE*256)+0xa, 0, 0, 0);
 	*arr = 0xa;
 			++arr;
 			*arr = 0x0;
