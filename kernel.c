@@ -1,10 +1,16 @@
 main(){
-	char buffer[13312]; /*this is the maximum size of a file*/
+	// char buffer[13312]; /*this is the maximum size of a file*/
+	// makeInterrupt21();
+	// interrupt(0x21, 3, "messag\0", buffer, 0); /*read the file into buffer*/
+	// interrupt(0x21, 0, buffer, 0, 0); /*print out the file*/
+	// while(1){
+	// }
+
 	makeInterrupt21();
-	interrupt(0x21, 3, "messag\0", buffer, 0); /*read the file into buffer*/
-	interrupt(0x21, 0, buffer, 0, 0); /*print out the file*/
-	while(1){
-	}
+interrupt(0x21, 4, "tstpr2\0", 0x2000, 0);
+while(1){
+
+}
 // 	char line[80];
 // makeInterrupt21();
 // interrupt(0x21,1,line,0,0);
@@ -118,6 +124,12 @@ void handleInterrupt21(int ax, int bx, int cx, int dx){
 	else if(ax == 3){
 		readFile(bx,cx);
 	}
+	else if(ax == 4){
+		executeProgram(bx , cx);
+	}
+	else if(ax == 5){
+		terminate();
+	}
 	else {
 	printString("Error \0");
 	}
@@ -169,5 +181,23 @@ readThisFile(char* secNum,char* fileToBeRead){
 		fileToBeRead += 512;
 		secNum = secNum+1;
 		++i;
+	}
+}
+
+executeProgram(char* name, int segment){
+	int i ;
+	char buffer[512];
+	readFile(name , buffer);
+	i = 0;
+	while(i<512){
+		putInMemory(segment , i , buffer[i]);
+		i++;
+	}
+	launchProgram(segment);
+}
+
+terminate(){
+	while(1){
+
 	}
 }
