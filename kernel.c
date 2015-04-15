@@ -1,49 +1,11 @@
 main(){
-	// char buffer[13312]; /*this is the maximum size of a file*/
-	// makeInterrupt21();
-	// interrupt(0x21, 3, "messag\0", buffer, 0); /*read the file into buffer*/
-	// interrupt(0x21, 0, buffer, 0, 0); /*print out the file*/
-	// while(1){
-	// }
-
-	makeInterrupt21();
-interrupt(0x21, 4, "tstpr2\0", 0x2000, 0);
-while(1){
-
-}
-// 	char line[80];
-// makeInterrupt21();
-// interrupt(0x21,1,line,0,0);
-// interrupt(0x21,0,line,0,0);
-	// int m ;
-	// char x1[2];
-	// char x2[2];
-	// char yes[2];
-	// char no[2];
-	// x1[0] = 'a';
-	// x1[1] = 'b';
-	// x2[0] = 'a';
-	// x2[1] = 'b';
-	// yes[0] = '1';
-	// yes[1] = '\0';
-	// no[0] = '0';
-	// no[1] = '\0';
-	// m = charEqual(x1,x2,2);
-	// if (m == 1){
-	// 	printString(yes);
-	// }else if (m == 0){
-	// 	printString(no);
-	// }
-	// else {
-	// 	printString(no);	
-	// }
+	runShell();
 }
 printString(char* arr){
 	while(*arr != '\0'){
 		interrupt(0x10, (0xE*256)+(*arr), 0, 0, 0);
 		++arr;
 	}
-	
 }
 readString(char* arr){
 	int size = 0;
@@ -65,15 +27,11 @@ readString(char* arr){
 		++size;
 		}
 	}
-	while(size>0){
-		interrupt(0x10, (0xE*256)+0x8, 0, 0, 0);
-		size--;
-	}
+	interrupt(0x10,(0xE*256)+0xd,0,0,0);
 	interrupt(0x10, (0xE*256)+0xa, 0, 0, 0);
 	*arr = 0xa;
-			++arr;
-			*arr = 0x0;
-	
+	++arr;
+	*arr = 0x0;
 }
 int mult(int x , int y){
 	int result = 0;
@@ -126,6 +84,7 @@ void handleInterrupt21(int ax, int bx, int cx, int dx){
 	}
 	else if(ax == 4){
 		executeProgram(bx , cx);
+		terminate();
 	}
 	else if(ax == 5){
 		terminate();
@@ -158,6 +117,9 @@ int charEqual(char* x,char* y,int size){
 	int eq = 1;
 	while (i < size){
 		if(*x==*y){
+			if(*x == '\0'){
+				break;
+			}
 		}
 		else {
 			eq = 0;
@@ -197,7 +159,37 @@ executeProgram(char* name, int segment){
 }
 
 terminate(){
+	interrupt(0x21,4,"shell\0",0x2000,0);
+}
+mile3test1(){
+	char buffer[13312]; /*this is the maximum size of a file*/
+	makeInterrupt21();
+	interrupt(0x21, 3, "messag\0", buffer, 0); /*read the file into buffer*/
+	interrupt(0x21, 0, buffer, 0, 0); /*print out the file*/
+	while(1){
+	}
+	// after compiling run: ./loadFile message.txt
+
+}
+mile3test2(){
+	makeInterrupt21();
+	interrupt(0x21, 4, "tstprg\0", 0x2000, 0);
 	while(1){
 
 	}
+	//after compiling run: ./loadfile tstprg
+
+}
+mile3test3(){
+	makeInterrupt21();
+	interrupt(0x21, 5, 0, 0x2000, 0);
+	//after compiling run: ./loadfile tstpr2
+}
+mile3test4(){
+	makeInterrupt21();
+	interrupt(0x21,4,"shell\0",0x2000,0);
+}
+runShell(){
+	mile3test4();
+	return ;
 }

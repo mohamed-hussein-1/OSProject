@@ -20,7 +20,19 @@ echo 'done copying kernel'
 echo '------------------------'
 echo 'copying map to sector 1'
 dd if=map.img of=floppya.img bs=512 count=1 seek=1 conv=notrunc
-echo 'copying file to sector 2'
 dd if=dir.img of=floppya.img bs=512 count=1 seek=2 conv=notrunc
+
 echo 'done copying :D ur os is now ready to print hello world :D'
 
+echo 'compiling shell.c'
+bcc -ansi -c -o shell.o shell.c
+echo 'assembling lib.asm'
+as86 lib.asm -o lib.o
+echo 'linkin shell to lib'
+ld86 -o shell -d shell.o lib.o
+echo 'done'
+./loadFile message.txt
+./loadFile shell
+./loadFile tstprg
+./loadFile tstpr2
+echo 'done loading'
