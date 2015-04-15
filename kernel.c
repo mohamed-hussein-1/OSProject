@@ -159,7 +159,14 @@ executeProgram(char* name, int segment){
 }
 
 terminate(){
-	interrupt(0x21,4,"shell\0",0x2000,0);
+	char shell[6];
+	shell[0] = 's';
+	shell[1] = 'h';
+	shell[2] = 'e';
+	shell[3] = 'l';
+	shell[4] = 'l';
+	shell[5] = 0x0;
+	interrupt(0x21, 4, shell, 0x2000, 0);
 }
 mile3test1(){
 	char buffer[13312]; /*this is the maximum size of a file*/
