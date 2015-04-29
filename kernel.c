@@ -94,7 +94,10 @@ void handleInterrupt21(int ax, int bx, int cx, int dx){
 		terminate();
 	}
 	else if(ax == 6){
-		writeSector(bx,cx)
+		writeSector(bx,cx);
+	}
+	else if(ax == 7){
+		deleteFile(bx);
 	}
 	else {
 	printString("Error \0");
