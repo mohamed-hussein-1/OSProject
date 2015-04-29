@@ -1,17 +1,40 @@
 main(){
-	// char buffer[13312];
+	 // char buffer[13312];
 	// makeInterrupt21();
 	// interrupt(0x21, 7, "messag\0", 0, 0); //delete messag
 	// interrupt(0x21, 3, "messag\0", buffer, 0); // try to read messag
 	// interrupt(0x21, 0, buffer, 0, 0); //print out the contents of buffer
-	// while (1){
-
-	// }	
-	 runShell();
+	// runShell();
+	// dir();
+	// char testim[512];
+	// writeFile("testim\0" , "the hardest\0" , 1);
+	// readFile("testim" , testim);
+	// printString(testim);
+	// int i=0;
+	// char buffer1[13312];
+	// char buffer2[13312];
+	// buffer2[0]='h'; buffer2[1]='e'; buffer2[2]='l'; buffer2[3]='l';
+	// buffer2[4]='o';
+	// for(i=5; i<13312; i++) buffer2[i]=0x0;
+	// makeInterrupt21();
+	// interrupt(0x21,8, "testW\0", buffer2, 1); //write file testW
+	// interrupt(0x21,3, "testW\0", buffer1, 0); //read file testW
+	// interrupt(0x21,0, buffer1, 0, 0); // print out contents of testW
+	dir();
+	 // runShell();
+	// readFile("messag\0" , buffer);
+	// printString(buffer);
 	// deleteFile("messag\0");
-	while(1){
+	// readFile("messag\0" , buffer);
+	// printString(buffer);
 
-	}
+	while (1){
+
+	}	
+	
+	// while(1){
+
+	// }
 }
 printString(char* arr){
 	while(*arr != '\0'){
@@ -107,6 +130,12 @@ void handleInterrupt21(int ax, int bx, int cx, int dx){
 	else if(ax == 7){
 		deleteFile(bx);
 	}
+	else if(ax == 8){
+		writeFile(bx , cx , dx);
+	}
+	else if(ax == 9){
+		dir();
+	}
 	else {
 	printString("Error \0");
 	}
@@ -130,6 +159,33 @@ readFile(char* fileName,char* fileToBeRead){
 	}
 	return;
 }
+
+// readFile(char* fileName,char* fileToBeRead){
+// 	char dirSector[512];
+// 	int isEqual = 3;
+// 	int 
+// 	int i = 0;
+// 	int j = 0;
+
+// 	readSector(dirSector , 2);
+// 	while(i<512){
+// 		while(j<6){
+// 			if(dirSector[i+j] != fileName[j]){
+
+// 			}
+// 		}
+// 	}
+
+
+charEqual2(char* x , char* y , int l){
+	while(l>0){
+		if(x[l]!= y[l]){
+			return 3;
+		}
+	}
+	return 1;
+}
+
 int charEqual(char* x,char* y,int size){
 	int i = 0;
 	int eq = 1;
@@ -147,6 +203,7 @@ int charEqual(char* x,char* y,int size){
 		++y;
 		++i;
 	}
+
 	return eq;
 }
 readThisFile(char* secNum,char* fileToBeRead){
@@ -231,134 +288,151 @@ writeSector(char* arr , int sector){
 
 deleteFile(char* name){
 	char map[512];
-	char* mapP = map;
 	char directory[512];
-	char* directoryP = directory;
-	char fileNameFromDirectory[32];	
-	char* fileNameFromDirectoryP = fileNameFromDirectory;
-	
-
-	int i = 1;
+	int positionInDirectory;
+	int i = 0;
 	int j = 0;
+	int found = 0;
+	int flag = 0;
 
-	readSector(mapP , 1);
-	readSector(directoryP , 2);
-	getFileNameFromDirectory(name , fileNameFromDirectoryP);
+	readSector(map , 1);
+	readSector(directory , 2);
 
-	*fileNameFromDirectoryP = 0x00;
-	fileNameFromDirectoryP = fileNameFromDirectoryP + 6;
-	
-	
-	while(j<26){
-		deleteFromMap(fileNameFromDirectoryP , mapP);
-		fileNameFromDirectoryP++;
-		j++;
+	while(i<512){
+		while(j<6){
+			if(directory[i+j] != name[j]){
+				i += 32;
+				found = 0;
+				break;
+			}
+			j++;
+			found++;
+		}
+		j = 0;
+		if(found == 6){
+			positionInDirectory = i;
+			directory[i] = 0x00;
+			flag = 1;
+		}
+	}
+	if(flag == 1){
+		writeSector(directory , 2);
+		positionInDirectory += 6 ;
 
+		while(directory[positionInDirectory] != 0x00){
+			map[positionInDirectory+1] = 0x00;
+			positionInDirectory++;
+		}
+
+		 writeSector(map ,1);
+	}
+	else{
+		printString("name of file not found .. better luck next time :D \0");
+	}
+
+}
+
+dir(){
+	char directory[512];
+	char name[50];
+	int j = 0;
+	int i = 0;
+	int flag = 0;
+	int num = 0;
+	int found = 0;
+	int x = 11;
+
+	name[6] = ' ';
+	name[7] = ' ';
+	name[8] = ' ';
+	name[9] = ' ';
+
+	while(x<50){
+		name[x] = ' ';
+		x++;
+	}
+	readSector(directory ,2);
+	while(i<512){
+		if (directory[i] != 0x00){
+			while(j<6){
+			name[j] = directory[i+j];
+			j++;
+			}
+			while(directory[i+j] != 0x00){
+				num ++;
+				j++;
+				flag = 1;
+			}
+			found = 1;
+		}
+		i += 32;
+		j = 0;
+		if (flag == 1){
+			name[11] = mod(num , 10)+48;
+			name[10] = divide(num , 10)+48;
+		}
+		if(found == 1){
+		printString(name);
+		interrupt(0x10,(0xE*256)+0xd,0,0,0);
+		}
+		num = 0;
+		flag = 0;
+		found = 0;
 	}
 }
 
-// deleteFile(char* name){
-// 	char map[512];
-// 	char directory[512];
-// 	char* namePointerInDirectory;
-// 	char* test;
-
-// 	readSector(map , 1);
-// 	readSector(directory , 2);
-// 	printString("5od\0");
-
-// 	getFileNameFromDirectory(name , namePointerInDirectory);
-// 	test = namePointerInDirectory;
-// 	test++;
-// 	*test = '\0';
-// 	printString(test);
-
-// }
-
-// getFileNameFromDirectory(char* name , char* namePointerInDirectory){
-// 	char* dirSectorP;
-// 	int isEqual = 33;
-// 	int i = 0;
-
-// 	readSector(dirSectorP , 2);
-
-// 	while(i < 16){
-// 		isEqual = charEqual(dirSectorP,name,6);
-// 		if (isEqual == 1){
-// 			namePointerInDirectory = dirSectorP;
-// 			break;
-// 		}
-// 		dirSectorP = dirSectorP+32;
-// 		++i;
-// 	}
-// 	return;
-
-//}
-
-getFileNameFromDirectory(char* fileName,char* fileToBeRead){
-	char dirSector[512];
-	char* dirSectorP;
-	int isEqual = 33;
+writeFile(char* name, char* buffer,int secNum){
+	char map[512];
+	char directory[512];
 	int i = 0;
+	int ij = 0;
 	int j = 0;
-
-	readSector(dirSectorP,2);
-	while(i < 16){
-		isEqual = charEqual(dirSectorP,fileName,6);
-		if (isEqual == 1){
-			fileToBeRead = dirSectorP;
+	readSector(map,1);
+	readSector(directory,2);
+	while(i<16){
+		if(directory[ij] == 0x00){
 			break;
 		}
-		dirSectorP = dirSectorP+32;
+		i++;
+		ij+=32;
+	}
+	if (i == 16){
+		printString("maximumnumber of files \0");
+		return;
+	}
+	i = 0;
+	while(i<6){
+		if (name[i] == '\0'){
+			break;
+		}
+		directory[ij] = name[i];
+		++ij;
 		++i;
 	}
-	return;
-}
-
-deleteFromMap(char* file , char* map){
-	int i = 0;
-	while(i <= *file){
-		map++;
+	while(i<6){
+		directory[ij] = 0x00;
+		++ij;
+		++i;
+	}
+	i = 0;
+	while(i<secNum){
+		j = 0;
+		while(j < 256){
+			if (map[j] == 0x00){
+				map[j] = 0xff;
+				writeSector(buffer,j);
+				directory[ij+i] = j;
+				j = 900;
+				buffer += 512;
+			}
+			j++;
+		}
 		i++;
 	}
-	*map = 0x00;
-	while(i>0){
-		map--;
-		i--;
-	}
-}
-
-SearchinDirectory(char* fileName,char* NamePointer){
-	char dirSector[512];
-	char* dirSectorP = dirSector;
-	int isEqual = 33;
-	int i = 0;
-
-	readSector(dirSector,2);
-	while(i < 16){
-		isEqual = charEqual(dirSectorP,NamePointer,6);
-		if (isEqual == 1){
-			getPointerFromDirectory(dirSectorP,NamePointer);
-			break;
-		}
-		dirSectorP = dirSectorP+32;
+	while(i<26){
+		map[ij+i] = 0x00;
 		++i;
 	}
-	return;
+	writeSector(map,1);
+	writeSector(directory,2);
 }
-
-getPointerFromDirectory(char* secNum,char* NamePointer){
-	int i = 0;
-	int secAsInt;
-	while(i<6){
-		secAsInt = *secNum;	
-		if (secAsInt == 0){
-			break;
-		}
-		readSector(NamePointer,secAsInt);
-		NamePointer += 512;
-		secNum = secNum+1;
-		++i;
-	}
-}
-

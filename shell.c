@@ -3,6 +3,7 @@ main(){
 	char buffer[13312];
 	while(1){
 		// makeInterrupt21();
+		buffer[0] = '\0';
 		interrupt(0x21, 0, "A: \0", 0, 0); /*print A:*/
 		
 		interrupt(0x21,1,command,0,0); /*takes input*/
@@ -13,6 +14,12 @@ main(){
 		}
 		else if (charEqual("excute", command,6) == 1){
 			interrupt(0x21,4,command+7,0x2000,0);
+		}
+		else if (charEqual("delete", command,6) == 1){
+			interrupt(0x21,7,command+7,0,0);
+		}
+		else if (charEqual("dir", command,3) == 1){
+			interrupt(0x21,9,0,0,0);
 		}
 		else {
 			interrupt(0x21,0,"bad command\n\r\0",0,0);
