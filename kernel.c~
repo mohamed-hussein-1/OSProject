@@ -1,9 +1,5 @@
 main(){
-	char buffer[13312];
-makeInterrupt21();
-interrupt(0x21, 7, "messag\0", 0, 0); //delete messag
-interrupt(0x21, 3, "messag\0", buffer, 0); // try to read messag
-interrupt(0x21, 0, buffer, 0, 0); //print out the contents of buffer
+	runShell();
 }
 printString(char* arr){
 	while(*arr != '\0'){
@@ -217,68 +213,3 @@ writeSector(char* arr , int sector){
 	track = divide(sector,36);
 	interrupt(0x13, (3*256)+1,arr, (track*256)+rel_sec,(head*256)+0);
 }
-
-deleteFile(char* name){
-	char* map;
-	char* directory;
-	char* filePointer;
-	char* file;
-	int i = 1;
-	readSector(map , 1);
-	readFile(name , file);
-	SearchinDirectory(*name , *filePointer);
-	*filePointer = 0x00;
-	while(!*file == 0x00){
-		deleteFromMap(*file , *map);
-	}
-
-	
-}
-
-deleteFromMap(char* file , char* map){
-	int i = 0;
-	while(i <= *file){
-		map++;
-		i++;
-	}
-	*map = 0x00;
-	while(i>0){
-		map--;
-		i--;
-	}
-}
-
-SearchinDirectory(char* fileName,char* NamePointer){
-	char dirSector[512];
-	char* dirSectorP = dirSector;
-	int isEqual = 33;
-	int i = 0;
-
-	readSector(dirSector,2);
-	while(i < 16){
-		isEqual = charEqual(dirSectorP,NamePointer,6);
-		if (isEqual == 1){
-			getPointerFromDirectory(dirSectorP,NamePointer);
-			break;
-		}
-		dirSectorP = dirSectorP+32;
-		++i;
-	}
-	return;
-}
-
-getPointerFromDirectory(char* secNum,char* NamePointer){
-	int i = 0;
-	int secAsInt;
-	while(i<6){
-		secAsInt = *secNum;	
-		if (secAsInt == 0){
-			break;
-		}
-		readSector(NamePointer,secAsInt);
-		NamePointer += 512;
-		secNum = secNum+1;
-		++i;
-	}
-}
-
